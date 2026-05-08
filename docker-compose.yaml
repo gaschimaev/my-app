@@ -1,19 +1,30 @@
 version: '3.8'
+
 services:
+
   database:
     image: mysql:8.0
+    container_name: mysql_db
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: appdb
       MYSQL_USER: admin
-      MYSQL_PASSWORD: password123
+      MYSQL_PASSWORD: Buagtft1!
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin", "-pBuagtft1!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
+    container_name: backend_app
+    restart: always
     ports:
       - "3000:3000"
     environment:
@@ -21,12 +32,18 @@ services:
       DB_USER: admin
       DB_PASS: Buagtft1!
       DB_NAME: appdb
-      S3_BUCKET: my-app-files-gaschimaev
+      S3_BUCKET: ""
+      CLOUDFRONT_URL: ""
+      PORT: 3000
+      NODE_ENV: development
     depends_on:
-      - database
+      database:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
+    container_name: frontend_app
+    restart: always
     ports:
       - "80:80"
     depends_on:
